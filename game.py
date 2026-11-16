@@ -5,11 +5,11 @@ import pygame
 class PipePair:
     def __init__(self, interval):
         self.col = 15
-        self.top_pipe_bottom = random.randint(1, 11)
+        self.top_pipe_bottom = random.randint(0, 10)
         self.interval = interval
         self.last_update = time.monotonic()
-    def get_bottom(self):
-        return self.top_pipe_bottom + 4
+    def get_bottom_top(self):
+        return self.top_pipe_bottom + 5
     def update(self):
         time_now = time.monotonic()
         if (time_now - self.last_update >= self.interval):
@@ -42,7 +42,7 @@ class Grid:
 
     def remove_pipe(self):
         if len(self.pipe_pairs) > 0:
-            if self.pipe_pairs[0].col == 0:
+            if self.pipe_pairs[0].col < 0:
                 self.pipe_pairs.pop(0)
 
     def scroll(self):
@@ -71,11 +71,16 @@ class Game:
     def render(self):
         for row in self.grid.height:
             for col in self.grid.width:
-                self.pygame.draw.rect(self.screen, self.colors['black'], ())
+                self.pygame.draw.rect(self.screen, self.colors['white'], (col * self.pixels_per_cell, row * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell))
+
+        for pipe_pair in self.grid.pipe_pairs:
+            self.pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, 0, self.pixels_per_cell, self.pixels_per_cell * (pipe_pair.top_pipe_bottom + 1)))
+            self.pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, pipe_pair.get_bottom_top() * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell * (self.grid.height - pipe_pair.get_bottom_top() + 1)))
 
 
 def main():
-    print("hi")
+    game = Game()
+    game.run()
 
 
 if __name__ == "__main__":
