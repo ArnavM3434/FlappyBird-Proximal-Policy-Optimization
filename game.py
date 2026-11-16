@@ -1,5 +1,6 @@
 import random
 import time
+import pygame
 
 class PipePair:
     def __init__(self, interval):
@@ -51,15 +52,35 @@ class Grid:
 class Game:
     def __init__(self):
         self.grid = Grid()
+        self.pygame = pygame.init()
+        self.width_in_pixels = 512
+        self.height_in_pixels = 512
+        self.pixels_per_cell = self.width_in_pixels / self.grid.width
+        self.screen = self.pygame.display.set_mode(self.width_in_pixels, self.height_in_pixels)
+        self.colors = {
+            'black' : (0,0,0),
+            'white' : (255,255,255)
+        }
 
     def run(self):
-        
         self.grid.add_pipe()
         self.grid.scroll()
         self.grid.remove_pipe()
         self.render()
 
     def render(self):
+        for row in self.grid.height:
+            for col in self.grid.width:
+                self.pygame.draw.rect(self.screen, self.colors['black'], ())
+
+
+def main():
+    print("hi")
+
+
+if __name__ == "__main__":
+    main()
+
 
 
 
