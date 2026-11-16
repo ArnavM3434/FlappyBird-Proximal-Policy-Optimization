@@ -31,7 +31,7 @@ class Grid:
     def __init__(self):
         self.width= 16
         self.height = 16
-        self.bird = Bird()
+        self.bird = Bird(0.1)
         self.pipe_pairs = []
         
 
@@ -63,10 +63,11 @@ class Game:
         }
 
     def run(self):
-        self.grid.add_pipe()
-        self.grid.scroll()
-        self.grid.remove_pipe()
-        self.render()
+        while true:
+            self.grid.add_pipe()
+            self.grid.scroll()
+            self.grid.remove_pipe()
+            self.render()
 
     def render(self):
         for row in self.grid.height:
