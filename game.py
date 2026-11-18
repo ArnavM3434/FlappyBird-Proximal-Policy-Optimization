@@ -33,12 +33,13 @@ class Grid:
         self.height = 16
         self.bird = Bird(0.1)
         self.pipe_pairs = []
+        self.distance_between_pipe_pairs = 5
         
 
     def add_pipe(self):
         num_pipe_pairs = len(self.pipe_pairs)
-        if num_pipe_pairs == 0 or self.pipe_pairs[num_pipe_pairs - 1].col < 14:
-            self.pipe_pairs.append(PipePair(0.25))
+        if num_pipe_pairs == 0 or self.pipe_pairs[num_pipe_pairs - 1].col < (self.width - self.distance_between_pipe_pairs):
+            self.pipe_pairs.append(PipePair(1))
 
     def remove_pipe(self):
         if len(self.pipe_pairs) > 0:
@@ -52,31 +53,37 @@ class Grid:
 class Game:
     def __init__(self):
         self.grid = Grid()
-        self.pygame = pygame.init()
         self.width_in_pixels = 512
         self.height_in_pixels = 512
         self.pixels_per_cell = self.width_in_pixels / self.grid.width
-        self.screen = self.pygame.display.set_mode(self.width_in_pixels, self.height_in_pixels)
         self.colors = {
             'black' : (0,0,0),
             'white' : (255,255,255)
         }
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.width_in_pixels, self.height_in_pixels))
 
     def run(self):
-        while true:
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
             self.grid.add_pipe()
             self.grid.scroll()
             self.grid.remove_pipe()
             self.render()
 
     def render(self):
-        for row in self.grid.height:
-            for col in self.grid.width:
-                self.pygame.draw.rect(self.screen, self.colors['white'], (col * self.pixels_per_cell, row * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell))
+        for row in range(self.grid.height):
+            for col in range(self.grid.width):
+                pygame.draw.rect(self.screen, self.colors['white'], (col * self.pixels_per_cell, row * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell))
 
         for pipe_pair in self.grid.pipe_pairs:
-            self.pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, 0, self.pixels_per_cell, self.pixels_per_cell * (pipe_pair.top_pipe_bottom + 1)))
-            self.pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, pipe_pair.get_bottom_top() * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell * (self.grid.height - pipe_pair.get_bottom_top() + 1)))
+            pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, 0, self.pixels_per_cell, self.pixels_per_cell * (pipe_pair.top_pipe_bottom + 1)))
+            pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, pipe_pair.get_bottom_top() * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell * (self.grid.height - pipe_pair.get_bottom_top() + 1)))
+
+        pygame.display.flip()
 
 
 def main():
