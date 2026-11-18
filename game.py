@@ -104,13 +104,13 @@ class Game:
                     pygame.quit()
                     return  
 
-            ###PAUSE
-
+            keys = pygame.key.get_pressed()
 
             ###PAUSE
             
+            ###PAUSE
+            
                 
-            keys = pygame.key.get_pressed()
             up_key_pressed = keys[pygame.K_UP] or up_key_pressed
             if self.grid.bird.update(up_key_pressed):
                 up_key_pressed = False
