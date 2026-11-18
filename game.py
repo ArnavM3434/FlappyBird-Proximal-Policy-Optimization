@@ -95,6 +95,9 @@ class Game:
         self.screen = pygame.display.set_mode((self.width_in_pixels, self.height_in_pixels))
         self.reward = 0
         self.font = pygame.font.SysFont(None, 48)
+        self.last_pause_time = time.monotonic()
+        self.pause_interval = 5
+        self.pause_duration = 5
 
     def run(self):
         up_key_pressed = False
@@ -104,13 +107,13 @@ class Game:
                     pygame.quit()
                     return  
 
-            keys = pygame.key.get_pressed()
+            
 
             ###PAUSE
-            
+            self.pause()
             ###PAUSE
             
-                
+            keys = pygame.key.get_pressed()
             up_key_pressed = keys[pygame.K_UP] or up_key_pressed
             if self.grid.bird.update(up_key_pressed):
                 up_key_pressed = False
@@ -138,6 +141,17 @@ class Game:
         self.screen.blit(text_surface, (0, 0))
         
         pygame.display.flip()
+
+    def pause(self):
+        pause_entry_time = time.monotonic()
+        if (pause_entry_time - self.last_pause_time >= self.pause_interval):
+            while True:
+                if time.monotonic() - pause_entry_time >= self.pause_duration:
+                    break
+            self.last_pause_time = time.monotonic()
+            
+                
+
 
 
 def main():
