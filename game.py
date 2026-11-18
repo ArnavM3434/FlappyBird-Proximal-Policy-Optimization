@@ -20,18 +20,31 @@ class Bird:
     def __init__(self, interval):
         self.row = 8
         self.col = 5
+        self.interval = interval
+        self.last_update = time.monotonic()
 
     def move_up(self):
         self.row -= 1
     def fall(self):
         self.row += 1
-    
+    def update(self, key):
+        time_now = time.monotonic()
+        moved = False
+        if (time_now - self.last_update >= self.interval):
+            if (key == True):
+                self.move_up()
+                moved = True
+            else:
+                self.fall()
+            self.last_update = time_now
+        return moved
+
 
 class Grid:
     def __init__(self):
         self.width= 16
         self.height = 16
-        self.bird = Bird(0.1)
+        self.bird = Bird(0.5)
         self.pipe_pairs = []
         self.distance_between_pipe_pairs = 5
         
@@ -47,8 +60,25 @@ class Grid:
                 self.pipe_pairs.pop(0)
 
     def scroll(self):
+        num_pipes_bird_passed = 0
         for pipe_pair in self.pipe_pairs:
+            pipe_previously_in_front = pipe_pair.col >= self.bird.col
             pipe_pair.update()
+            pipe_now_behind = pipe_pair.col < self.bird.col
+            if pipe_previously_in_front and pipe_now_behind:
+                num_pipes_bird_passed += 1
+        return num_pipes_bird_passed
+
+    def collision(self):
+        bird_row = self.bird.row
+        for pipe_pair in self.pipe_pairs:
+            if self.bird.col == pipe_pair.col:
+                if bird_row <= pipe_pair.top_pipe_bottom or bird_row >= pipe_pair.get_bottom_top():
+                    return True
+        if bird_row < 0 or bird_row >= self.height:
+            return True 
+        return False
+    
 
 class Game:
     def __init__(self):
@@ -58,20 +88,38 @@ class Game:
         self.pixels_per_cell = self.width_in_pixels / self.grid.width
         self.colors = {
             'black' : (0,0,0),
-            'white' : (255,255,255)
+            'white' : (255,255,255),
+            'blue' : (0, 0, 255)
         }
         pygame.init()
         self.screen = pygame.display.set_mode((self.width_in_pixels, self.height_in_pixels))
+        self.reward = 0
+        self.font = pygame.font.SysFont(None, 48)
 
     def run(self):
+        up_key_pressed = False
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    return
+                    return  
+
+            ###PAUSE
+
+
+            ###PAUSE
+            
+                
+            keys = pygame.key.get_pressed()
+            up_key_pressed = keys[pygame.K_UP] or up_key_pressed
+            if self.grid.bird.update(up_key_pressed):
+                up_key_pressed = False
+           
             self.grid.add_pipe()
-            self.grid.scroll()
+            self.reward += self.grid.scroll()
             self.grid.remove_pipe()
+            if self.grid.collision():
+                pygame.quit()
             self.render()
 
     def render(self):
@@ -83,6 +131,12 @@ class Game:
             pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, 0, self.pixels_per_cell, self.pixels_per_cell * (pipe_pair.top_pipe_bottom + 1)))
             pygame.draw.rect(self.screen, self.colors['black'], (pipe_pair.col * self.pixels_per_cell, pipe_pair.get_bottom_top() * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell * (self.grid.height - pipe_pair.get_bottom_top() + 1)))
 
+        bird = self.grid.bird
+        pygame.draw.rect(self.screen, self.colors['blue'], (bird.col * self.pixels_per_cell, bird.row * self.pixels_per_cell, self.pixels_per_cell, self.pixels_per_cell))
+
+        text_surface = self.font.render(str(self.reward), True, self.colors['black'])
+        self.screen.blit(text_surface, (0, 0))
+        
         pygame.display.flip()
 
 
